@@ -8,11 +8,11 @@ android {
         prefab true
     }
     defaultConfig {
-        applicationId "org.easyrpg.player"
+        applicationId "dev.enginehost.plugin.rpgmaker.easyrpg.v0811.slot1"
         compileSdkVersion 36
         minSdkVersion 23
         targetSdkVersion 36
-        versionName VERSION_NAME
+        versionName "0.1.0"
         versionCode Integer.parseInt(VERSION_CODE)
     }
     signingConfigs {

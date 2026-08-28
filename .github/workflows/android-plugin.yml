@@ -1,0 +1,39 @@
+name: Build enginehost EasyRPG plugin
+
+on:
+  push:
+    branches: [plugin-core, "plugin/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: Player
+      - name: Fetch the official EasyRPG Android dependency build
+        run: |
+          git clone --depth 1 https://github.com/EasyRPG/buildscripts.git buildscripts
+          cd buildscripts/android
+          ./1_download_library.sh
+          sed -i '/build "ARMeabi-v7a"/d; /build "x86"/d; /build "x86_64"/d' 2_build_toolchain.sh
+          ./2_build_toolchain.sh
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build arm64 plugin APK
+        working-directory: Player/builds/android
+        env:
+          ANDROID_HOME: ${{ github.workspace }}/buildscripts/android/android-sdk
+        run: ./gradlew -PtoolchainDirs="${{ github.workspace }}/buildscripts/android" :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: enginehost-rpgmaker-easyrpg-debug-apk
+          path: Player/builds/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

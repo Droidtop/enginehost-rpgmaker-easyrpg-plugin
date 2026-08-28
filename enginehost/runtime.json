@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "engine": "rpgmaker",
+  "pluginVersion": "0.1.0",
+  "packageName": "dev.enginehost.plugin.rpgmaker.easyrpg.v0811.slot1",
+  "contexts": ["2000", "2003"]
+}
