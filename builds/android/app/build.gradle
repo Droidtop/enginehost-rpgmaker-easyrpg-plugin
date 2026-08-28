@@ -4,11 +4,11 @@ android {
     ndkVersion '21.4.7075529'
     assetPacks = [":assets"]
     defaultConfig {
-        applicationId "org.easyrpg.player"
+        applicationId "dev.enginehost.plugin.rpgmaker.easyrpg.v0811.slot1"
         compileSdk 36
         minSdkVersion 21
         targetSdkVersion 36
-        versionName VERSION_NAME
+        versionName "0.1.0"
         versionCode Integer.parseInt(VERSION_CODE)
     }
     signingConfigs {
