@@ -24,7 +24,12 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/EasyRPG/buildscripts.git buildscripts
           cd buildscripts/android
-          ./1_download_library.sh
+          for attempt in 1 2 3; do
+            if ./1_download_library.sh; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            echo "Dependency archive preparation attempt $attempt failed; removing incomplete downloads"
+            find . -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.tar.xz' -o -name '*.zip' \) -delete
+          done
           sed -i '/build "ARMeabi-v7a"/d; /build "x86"/d; /build "x86_64"/d' 2_build_toolchain.sh
           for attempt in 1 2 3; do
             if ./2_build_toolchain.sh; then break; fi
