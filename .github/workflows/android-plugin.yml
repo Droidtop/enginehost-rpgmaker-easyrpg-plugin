@@ -35,6 +35,7 @@ jobs:
         working-directory: Player/builds/android
         env:
           ANDROID_HOME: ${{ github.workspace }}/buildscripts/android/android-sdk
+          ANDROID_SDK_ROOT: ${{ github.workspace }}/buildscripts/android/android-sdk
         run: ./gradlew -PtoolchainDirs="${{ github.workspace }}/buildscripts/android" :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
