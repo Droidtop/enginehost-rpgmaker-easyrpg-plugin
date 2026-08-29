@@ -44,6 +44,7 @@ jobs:
             -DICU_I18N_LIBRARY_RELEASE="$PREFIX/lib/libicui18n.a" \
             -DICU_UC_LIBRARY_RELEASE="$PREFIX/lib/libicuuc.a" \
             -DICU_DATA_LIBRARY_RELEASE="$PREFIX/lib/libicudata.a" \
+            -DEXPAT_LIBRARY="$PREFIX/lib/libexpat.a" -DEXPAT_INCLUDE_DIR="$PREFIX/include" \
             -DLIBLCF_ENABLE_TOOLS=OFF -DLIBLCF_ENABLE_TESTS=OFF \
             -DLIBLCF_ENABLE_BENCHMARKS=OFF -DLIBLCF_UPDATE_MIMEDB=OFF
           cmake --build liblcf/build --target install --parallel 2
