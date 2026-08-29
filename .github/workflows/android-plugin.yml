@@ -26,7 +26,11 @@ jobs:
           cd buildscripts/android
           ./1_download_library.sh
           sed -i '/build "ARMeabi-v7a"/d; /build "x86"/d; /build "x86_64"/d' 2_build_toolchain.sh
-          ./2_build_toolchain.sh
+          for attempt in 1 2 3; do
+            if ./2_build_toolchain.sh; then break; fi
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            echo "Dependency build attempt $attempt failed; retrying transient upstream downloads"
+          done
           PREFIX="$PWD/arm64-v8a-toolchain"
           NDK_DIR="$(find "$PWD/android-sdk/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           git clone --depth 1 --branch 0.8.1 https://github.com/EasyRPG/liblcf.git liblcf
