@@ -27,6 +27,17 @@ jobs:
           ./1_download_library.sh
           sed -i '/build "ARMeabi-v7a"/d; /build "x86"/d; /build "x86_64"/d' 2_build_toolchain.sh
           ./2_build_toolchain.sh
+          PREFIX="$PWD/arm64-v8a-toolchain"
+          NDK_DIR="$(find "$PWD/android-sdk/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          git clone --depth 1 --branch 0.8.1 https://github.com/EasyRPG/liblcf.git liblcf
+          cmake -S liblcf -B liblcf/build -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK_DIR/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_PREFIX_PATH="$PREFIX" \
+            -DLIBLCF_ENABLE_TOOLS=OFF -DLIBLCF_ENABLE_TESTS=OFF \
+            -DLIBLCF_ENABLE_BENCHMARKS=OFF -DLIBLCF_UPDATE_MIMEDB=OFF
+          cmake --build liblcf/build --target install --parallel 2
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
