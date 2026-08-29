@@ -40,6 +40,10 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_PREFIX_PATH="$PREFIX" \
             -DINIH_LIBRARY="$PREFIX/lib/libinih.a" -DINIH_INCLUDE_DIR="$PREFIX/include" \
+            -DICU_ROOT="$PREFIX" -DICU_INCLUDE_DIR="$PREFIX/include" \
+            -DICU_I18N_LIBRARY_RELEASE="$PREFIX/lib/libicui18n.a" \
+            -DICU_UC_LIBRARY_RELEASE="$PREFIX/lib/libicuuc.a" \
+            -DICU_DATA_LIBRARY_RELEASE="$PREFIX/lib/libicudata.a" \
             -DLIBLCF_ENABLE_TOOLS=OFF -DLIBLCF_ENABLE_TESTS=OFF \
             -DLIBLCF_ENABLE_BENCHMARKS=OFF -DLIBLCF_UPDATE_MIMEDB=OFF
           cmake --build liblcf/build --target install --parallel 2
