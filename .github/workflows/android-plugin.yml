@@ -29,6 +29,10 @@ jobs:
             git clone --depth 1 https://github.com/EasyRPG/buildscripts.git buildscripts
           fi
           cd buildscripts/android
+          # The historical SDL2-era script forces the host assembler. Modern
+          # runners do not provide a cross `as`; Clang's integrated assembler
+          # is the supported NDK path and accepts the same sources.
+          sed -i 's/-no-integrated-as //g' 2_build_toolchain.sh
           for attempt in 1 2 3; do
             if ./1_download_library.sh; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
