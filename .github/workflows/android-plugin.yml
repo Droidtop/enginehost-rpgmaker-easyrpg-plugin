@@ -22,7 +22,12 @@ jobs:
           sudo apt-get install -y meson ninja-build autoconf automake libtool pkg-config gperf
       - name: Fetch the official EasyRPG Android dependency build
         run: |
-          git clone --depth 1 https://github.com/EasyRPG/buildscripts.git buildscripts
+          if [ "$GITHUB_REF_NAME" = "plugin/0.8.1.1" ]; then
+            git clone --filter=blob:none https://github.com/EasyRPG/buildscripts.git buildscripts
+            git -C buildscripts checkout e94cc5426b186a24b503280588d6757c8334eb1c
+          else
+            git clone --depth 1 https://github.com/EasyRPG/buildscripts.git buildscripts
+          fi
           cd buildscripts/android
           for attempt in 1 2 3; do
             if ./1_download_library.sh; then break; fi
