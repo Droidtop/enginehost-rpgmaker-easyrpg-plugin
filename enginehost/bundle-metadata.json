@@ -1,0 +1,32 @@
+{
+  "bundleId": "dev.enginehost.rpgmaker.easyrpg.v1",
+  "engine": "rpgmaker",
+  "pluginVersion": "0.1.0",
+  "apiVersion": 1,
+  "entrypoint": "org.easyrpg.player.EngineHostRunActivity",
+  "runtimeTransport": "android-activity",
+  "origin": "https://github.com/droidtop/enginehost-rpgmaker-easyrpg-plugin",
+  "dexFiles": ["classes.dex"],
+  "resourceApks": ["runtime.apk"],
+  "capabilities": [
+    {
+      "id": "rpgmaker-2000-easyrpg",
+      "engineContext": "2000",
+      "runtimeVersion": "0.8.1.1",
+      "supportedSeries": ["2000"],
+      "runtimeComponents": {"liblcf": "0.8.1"}
+    },
+    {
+      "id": "rpgmaker-2003-easyrpg",
+      "engineContext": "2003",
+      "runtimeVersion": "0.8.1.1",
+      "supportedSeries": ["2003"],
+      "runtimeComponents": {"liblcf": "0.8.1"}
+    }
+  ],
+  "source": {
+    "upstream": "https://github.com/EasyRPG/Player",
+    "revision": "0.8.1.1"
+  },
+  "licenses": ["GPL-3.0-or-later and bundled upstream notices"]
+}
