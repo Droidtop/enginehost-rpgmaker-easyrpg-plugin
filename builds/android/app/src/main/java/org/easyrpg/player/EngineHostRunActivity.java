@@ -23,7 +23,7 @@ public final class EngineHostRunActivity extends Activity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
 
-        String context = getIntent().getStringExtra("engineContext");
+        String context = getIntent().getStringExtra("dev.enginehost.runtime.ENGINE_CONTEXT");
         if (!"2000".equals(context) && !"2003".equals(context)) {
             fail("Unsupported RPG Maker engineContext: " + context);
             return;
@@ -31,7 +31,7 @@ public final class EngineHostRunActivity extends Activity {
 
         File game;
         try {
-            String path = getIntent().getStringExtra("path");
+            String path = getIntent().getStringExtra("dev.enginehost.runtime.PATH");
             if (path == null || !(game = new File(path).getCanonicalFile()).isDirectory()) {
                 fail("enginehost did not provide a valid game folder");
                 return;
