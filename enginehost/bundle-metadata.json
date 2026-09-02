@@ -24,6 +24,236 @@
       "runtimeComponents": {"liblcf": "0.8.1"}
     }
   ],
+  "declaredOptions": [
+    {
+      "key": "rtpPaths",
+      "label": "RTP folders",
+      "type": "path",
+      "repeats": true,
+      "description": "Folders searched for RTP assets the game does not ship. Joined into one --rtp-path value, which EasyRPG splits again on a colon (src/filefinder_rtp.cpp:129-150)."
+    },
+    {
+      "key": "savePath",
+      "label": "Save folder",
+      "type": "path",
+      "repeats": false,
+      "description": "Where save files are written; defaults to the game folder (--save-path, src/player.cpp:573)."
+    },
+    {
+      "key": "fontPath",
+      "label": "Font folder",
+      "type": "path",
+      "repeats": false,
+      "description": "Folder searched for fonts (--font-path, src/game_config.cpp:566). EasyRPG accepts one folder here, not a list."
+    },
+    {
+      "key": "encoding",
+      "label": "Text encoding",
+      "type": "string",
+      "repeats": false,
+      "description": "Encoding of the game text, for games whose language does not match the device, for example 932 for Japanese (--encoding, src/player.cpp:642)."
+    },
+    {
+      "key": "language",
+      "label": "Language",
+      "type": "string",
+      "repeats": false,
+      "description": "Name of a translation folder shipped with the game; default uses the original text (--language, src/player.cpp:666)."
+    },
+    {
+      "key": "engine",
+      "label": "Force engine version",
+      "type": "choice",
+      "repeats": false,
+      "description": "Overrides the RPG Maker version EasyRPG detects (--engine, src/game_config_game.cpp:73, accepted values at :39-58).",
+      "choices": [
+        {"value": "rpg2k", "label": "RPG Maker 2000"},
+        {"value": "rpg2kv150", "label": "RPG Maker 2000 (1.50 or later)"},
+        {"value": "rpg2ke", "label": "RPG Maker 2000 (English release)"},
+        {"value": "rpg2k3", "label": "RPG Maker 2003"},
+        {"value": "rpg2k3v105", "label": "RPG Maker 2003 (1.05 or later)"},
+        {"value": "rpg2k3e", "label": "RPG Maker 2003 (English release)"}
+      ]
+    },
+    {
+      "key": "soundfont",
+      "label": "MIDI SoundFont file",
+      "type": "string",
+      "repeats": false,
+      "description": "SoundFont file used for the game MIDI music. A file path (--soundfont, src/game_config.cpp:530)."
+    },
+    {
+      "key": "musicVolume",
+      "label": "Music volume",
+      "type": "number",
+      "repeats": false,
+      "description": "Background music volume, 0 to 100 (--music-volume, src/game_config.cpp:518)."
+    },
+    {
+      "key": "soundVolume",
+      "label": "Sound effect volume",
+      "type": "number",
+      "repeats": false,
+      "description": "Sound effect volume, 0 to 100 (--sound-volume, src/game_config.cpp:524)."
+    },
+    {
+      "key": "scalingMode",
+      "label": "Scaling method",
+      "type": "choice",
+      "repeats": false,
+      "description": "How the game picture is scaled to the screen (--scaling, src/game_config.cpp:492, values at src/game_config.h:127).",
+      "choices": [
+        {"value": "nearest", "label": "Nearest (fills the screen)"},
+        {"value": "integer", "label": "Integer (square pixels)"},
+        {"value": "bilinear", "label": "Bilinear (smoothed)"}
+      ]
+    },
+    {
+      "key": "gameResolution",
+      "label": "Game resolution",
+      "type": "choice",
+      "repeats": false,
+      "description": "Widescreen and ultrawide are experimental and can glitch (--game-resolution, src/game_config.cpp:498, values at src/game_config.h:134).",
+      "choices": [
+        {"value": "original", "label": "Original 320x240"},
+        {"value": "widescreen", "label": "Widescreen 416x240"},
+        {"value": "ultrawide", "label": "Ultrawide 560x240"}
+      ]
+    },
+    {
+      "key": "fullscreen",
+      "label": "Fullscreen",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Starts fullscreen rather than in a window (--fullscreen / --window, src/game_config.cpp:474-481)."
+    },
+    {
+      "key": "vsync",
+      "label": "Vertical sync",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Synchronises presentation with the display refresh (--vsync / --no-vsync, src/game_config.cpp:440)."
+    },
+    {
+      "key": "fpsLimit",
+      "label": "Frame rate cap",
+      "type": "number",
+      "repeats": false,
+      "description": "Frames per second limit; 60 is the rate the games expect and 0 removes the limit (--fps-limit, src/game_config.cpp:444)."
+    },
+    {
+      "key": "font1",
+      "label": "Font 1 file",
+      "type": "string",
+      "repeats": false,
+      "description": "Font file used where the game asks for its first font. A file path (--font1, src/game_config.cpp:536)."
+    },
+    {
+      "key": "font1Size",
+      "label": "Font 1 size",
+      "type": "number",
+      "repeats": false,
+      "description": "Point size for font 1 (--font1-size, src/game_config.cpp:542)."
+    },
+    {
+      "key": "font2",
+      "label": "Font 2 file",
+      "type": "string",
+      "repeats": false,
+      "description": "Font file used where the game asks for its second font. A file path (--font2, src/game_config.cpp:548)."
+    },
+    {
+      "key": "font2Size",
+      "label": "Font 2 size",
+      "type": "number",
+      "repeats": false,
+      "description": "Point size for font 2 (--font2-size, src/game_config.cpp:554)."
+    },
+    {
+      "key": "testPlay",
+      "label": "Test play mode",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Runs the game as the editor test play, enabling debug features (--test-play, src/player.cpp:509)."
+    },
+    {
+      "key": "hideTitle",
+      "label": "Skip the title screen graphic",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Hides the title background (--hide-title, src/player.cpp:514)."
+    },
+    {
+      "key": "noPatch",
+      "label": "Disable all compatibility patches",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Runs the game exactly as the original engine would, with every patch below turned off and locked (--no-patch, src/game_config_game.cpp:90)."
+    },
+    {
+      "key": "patchDynrpg",
+      "label": "DynRPG patch",
+      "type": "boolean",
+      "repeats": false,
+      "description": "For RPG Maker 2003 games built against DynRPG (src/game_config_game.cpp:111)."
+    },
+    {
+      "key": "patchManiac",
+      "label": "Maniac Patch",
+      "type": "boolean",
+      "repeats": false,
+      "description": "For games built against the Maniac Patch, which many later Japanese releases require (src/game_config_game.cpp:116)."
+    },
+    {
+      "key": "patchEasyrpg",
+      "label": "EasyRPG extensions",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Enables the engine own extensions to the RPG Maker command set (src/game_config_game.cpp:106)."
+    },
+    {
+      "key": "patchCommonThis",
+      "label": "This-event support in common events",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Lets common events refer to the calling event, as the community patch does (src/game_config_game.cpp:126)."
+    },
+    {
+      "key": "patchPicUnlock",
+      "label": "Picture limit removed",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Lifts the engine cap on simultaneous pictures (src/game_config_game.cpp:131)."
+    },
+    {
+      "key": "patchKeyPatch",
+      "label": "Ineluki Key Patch",
+      "type": "boolean",
+      "repeats": false,
+      "description": "For games using the Ineluki key input patch (src/game_config_game.cpp:136)."
+    },
+    {
+      "key": "patchRpg2k3Cmds",
+      "label": "RPG Maker 2003 commands in 2000 games",
+      "type": "boolean",
+      "repeats": false,
+      "description": "Allows 2003 event commands inside an RPG Maker 2000 game (src/game_config_game.cpp:141)."
+    },
+    {
+      "key": "patchAntilagSwitch",
+      "label": "Anti-lag switch number",
+      "type": "number",
+      "repeats": false,
+      "description": "Number of the switch that suppresses event page refreshes; 0 turns the patch off (src/game_config_game.cpp:146)."
+    },
+    {
+      "key": "patchDirectMenu",
+      "label": "Direct menu variable number",
+      "type": "number",
+      "repeats": false,
+      "description": "Number of the variable that opens a menu scene directly; 0 turns the patch off (src/game_config_game.cpp:158)."
+    }
+  ],
   "source": {
     "upstream": "https://github.com/EasyRPG/Player",
     "revision": "0.8.1.1"
