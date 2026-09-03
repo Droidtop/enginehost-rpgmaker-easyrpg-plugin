@@ -1,0 +1,13 @@
+{
+  "algorithm": "SHA256withECDSA",
+  "formatVersion": 1,
+  "issuer": {
+    "algorithm": "SHA256withECDSA",
+    "id": "enginehost-official-v1",
+    "keySha256": "E01B8F3DB54F70F3AC5390EC63158F754FEF1E3716BDCB8DF45E20315651A803",
+    "signature": "MEYCIQCumXohfEjrbIBfuw75iRvI0ucmUM7zFoIjyNPUfl2e9gIhAMmaNZPUETawmlPWMOf0gfh+x1VstZgHqHbVfKSiTC+a"
+  },
+  "keySha256": "D22D8E326E24D212F29C76CA02FB0486180C0DB87755DEB1CF3BCA22E9CB0A88",
+  "origin": "https://github.com/droidtop/enginehost-rpgmaker-easyrpg-plugin",
+  "publicKeySpki": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEueY7fu23C5VsCH14Ab1TgMosOGnL/d2nrD0/VWh9mw8l0F45SpitdBqC5+upLtmla5vDjixyQXxOI6Vi4rxfKg=="
+}

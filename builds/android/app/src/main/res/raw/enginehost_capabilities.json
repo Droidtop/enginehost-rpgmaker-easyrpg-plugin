@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "capabilities": [
+    {
+      "id": "rpgmaker-2000-easyrpg-0.8.1.1",
+      "engineContext": "2000",
+      "runtimeVersion": "0.8.1.1"
+    },
+    {
+      "id": "rpgmaker-2003-easyrpg-0.8.1.1",
+      "engineContext": "2003",
+      "runtimeVersion": "0.8.1.1"
+    }
+  ]
+}
