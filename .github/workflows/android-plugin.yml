@@ -38,6 +38,11 @@ concurrency:
 
 jobs:
   android:
+    # plugin-core is deliberately an orphan wrapper changeset: it has no
+    # upstream EasyRPG source tree (and therefore no builds/android/gradlew).
+    # A real engine line becomes buildable only after this changeset is merged
+    # into plugin/<version>, so compile and publish from those branches.
+    if: startsWith(github.ref, 'refs/heads/plugin/')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
