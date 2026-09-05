@@ -2,7 +2,7 @@ name: Build enginehost EasyRPG plugin
 
 on:
   push:
-    branches: [plugin-core, "plugin/**"]
+    branches: ["plugin/**"]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -23,6 +23,7 @@ on:
         description: "Release tag (default: derived from the bundle id; testing adds -testing)"
         type: string
         default: ""
+
 permissions:
   contents: read
 
@@ -37,6 +38,11 @@ concurrency:
 
 jobs:
   android:
+    # plugin-core is deliberately an orphan wrapper changeset: it has no
+    # upstream EasyRPG source tree (and therefore no builds/android/gradlew).
+    # A real engine line becomes buildable only after this changeset is merged
+    # into plugin/<version>, so compile and publish from those branches.
+    if: startsWith(github.ref, 'refs/heads/plugin/')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -185,12 +191,11 @@ jobs:
           # Enginehost bundle" step, gated on refs/heads/plugin/*), so a
           # missing one there means the upload or the download is broken --
           # fail loudly instead of the silent success that hid this exact
-          # break on plugin/0.8.1.1 (the bundle step was simply never merged
-          # from plugin-core, so every push and dispatch reported green with
-          # no release created and nobody noticed). plugin-core itself is the
-          # wrapper trunk: pushed directly it still runs the same workflow
-          # but has no version-pinned engine of its own to bundle, so that
-          # case alone stays a no-op.
+          # break on plugin/0.8.1.1 (the bundle step existed here on
+          # plugin-core but was never merged onto that line). plugin-core
+          # itself is the wrapper trunk: pushed directly it still runs the
+          # same workflow but has no version-pinned engine of its own to
+          # bundle, so that case alone stays a no-op.
           mkdir -p release
           bundle="$(find release -name '*.enginehost.tar.xz' -print -quit)"
           if [ -z "$bundle" ]; then
@@ -265,12 +270,11 @@ jobs:
           # Enginehost bundle" step, gated on refs/heads/plugin/*), so a
           # missing one there means the upload or the download is broken --
           # fail loudly instead of the silent success that hid this exact
-          # break on plugin/0.8.1.1 (the bundle step was simply never merged
-          # from plugin-core, so every push and dispatch reported green with
-          # no release created and nobody noticed). plugin-core itself is the
-          # wrapper trunk: pushed directly it still runs the same workflow
-          # but has no version-pinned engine of its own to bundle, so that
-          # case alone stays a no-op.
+          # break on plugin/0.8.1.1 (the bundle step existed here on
+          # plugin-core but was never merged onto that line). plugin-core
+          # itself is the wrapper trunk: pushed directly it still runs the
+          # same workflow but has no version-pinned engine of its own to
+          # bundle, so that case alone stays a no-op.
           mkdir -p release
           bundle="$(find release -name '*.enginehost.tar.xz' -print -quit)"
           if [ -z "$bundle" ]; then
