@@ -181,12 +181,24 @@ jobs:
           REQUESTED_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          # No artifact at all (a branch whose build makes no bundle) means no
-          # release directory either; that is "nothing to publish", not an error.
+          # This job needs: android. A plugin/* line's android job always
+          # produces a signed bundle (see the "Build signed internal
+          # Enginehost bundle" step, gated on refs/heads/plugin/*), so a
+          # missing one there means the upload or the download is broken --
+          # fail loudly instead of the silent success that hid this exact
+          # break on plugin/0.8.1.1 (the bundle step existed here on
+          # plugin-core but was never merged onto that line). plugin-core
+          # itself is the wrapper trunk: pushed directly it still runs the
+          # same workflow but has no version-pinned engine of its own to
+          # bundle, so that case alone stays a no-op.
           mkdir -p release
           bundle="$(find release -name '*.enginehost.tar.xz' -print -quit)"
           if [ -z "$bundle" ]; then
-            echo "This branch's build produced no signed bundle; nothing to publish."
+            if [[ "$GITHUB_REF" == refs/heads/plugin/* ]]; then
+              echo "::error::No signed bundle artifact found to publish; the android job should have produced one on $GITHUB_REF." >&2
+              exit 1
+            fi
+            echo "$GITHUB_REF carries no engine version to bundle (not a plugin/* line); nothing to publish."
             exit 0
           fi
           id="$(basename "$bundle" .enginehost.tar.xz)"
@@ -248,12 +260,24 @@ jobs:
           REQUESTED_TAG: 
         run: |
           set -euo pipefail
-          # No artifact at all (a branch whose build makes no bundle) means no
-          # release directory either; that is "nothing to publish", not an error.
+          # This job needs: android. A plugin/* line's android job always
+          # produces a signed bundle (see the "Build signed internal
+          # Enginehost bundle" step, gated on refs/heads/plugin/*), so a
+          # missing one there means the upload or the download is broken --
+          # fail loudly instead of the silent success that hid this exact
+          # break on plugin/0.8.1.1 (the bundle step existed here on
+          # plugin-core but was never merged onto that line). plugin-core
+          # itself is the wrapper trunk: pushed directly it still runs the
+          # same workflow but has no version-pinned engine of its own to
+          # bundle, so that case alone stays a no-op.
           mkdir -p release
           bundle="$(find release -name '*.enginehost.tar.xz' -print -quit)"
           if [ -z "$bundle" ]; then
-            echo "This branch's build produced no signed bundle; nothing to publish."
+            if [[ "$GITHUB_REF" == refs/heads/plugin/* ]]; then
+              echo "::error::No signed bundle artifact found to publish; the android job should have produced one on $GITHUB_REF." >&2
+              exit 1
+            fi
+            echo "$GITHUB_REF carries no engine version to bundle (not a plugin/* line); nothing to publish."
             exit 0
           fi
           id="$(basename "$bundle" .enginehost.tar.xz)"
