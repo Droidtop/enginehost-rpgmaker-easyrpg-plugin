@@ -57,7 +57,12 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
             return;
         }
 
-        String savePath = options.optString("savePath", game.getPath());
+        String savePath = getIntent().getStringExtra("dev.enginehost.runtime.SAVE_PATH");
+        if (savePath == null || savePath.isBlank()) {
+            // Compatibility with early host builds that had not added the
+            // dedicated save extra yet. Current Enginehost always supplies it.
+            savePath = options.optString("savePath", game.getPath());
+        }
         ArrayList<String> args = new ArrayList<>();
         args.add("--project-path");
         args.add(game.getPath());

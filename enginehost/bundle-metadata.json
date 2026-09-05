@@ -45,13 +45,6 @@
       "description": "Folders searched for RTP assets the game does not ship. Joined into one --rtp-path value, which EasyRPG splits again on a colon (src/filefinder_rtp.cpp:129-150)."
     },
     {
-      "key": "savePath",
-      "label": "Save folder",
-      "type": "path",
-      "repeats": false,
-      "description": "Where save files are written; defaults to the game folder (--save-path, src/player.cpp:573)."
-    },
-    {
       "key": "fontPath",
       "label": "Font folder",
       "type": "path",
