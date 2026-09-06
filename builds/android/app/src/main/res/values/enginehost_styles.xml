@@ -1,0 +1,12 @@
+<resources>
+    <!--
+      The hosted activity cannot inherit its theme from PackageManager because
+      its real class is supplied by Enginehost's manifest proxy. EasyRPG's
+      activity_player layout contains Material NavigationView, so the explicit
+      runtime theme must satisfy MaterialComponents as well as AppCompat.
+    -->
+    <style name="EnginehostPlayerActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

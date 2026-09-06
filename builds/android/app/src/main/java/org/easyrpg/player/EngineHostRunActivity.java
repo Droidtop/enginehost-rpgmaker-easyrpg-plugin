@@ -114,7 +114,7 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
         // proxy, so AppCompat cannot discover its theme through ActivityInfo.
         // The bundle resources are already attached by the host component
         // factory; select the player's real theme before AppCompat initializes.
-        setTheme(R.style.AppThemePlayerActivity);
+        setTheme(R.style.EnginehostPlayerActivity);
         super.onCreate(state);
         playerCreated = true;
     }
