@@ -115,16 +115,14 @@ public class VirtualCross extends VirtualButton {
                 sendSDLDownMessage(keyCode);
 
                 //Vibration
-                if (SettingsManager.isVibrationEnabled() && vibrator != null) {
-                    // 2 cases :
-                    // 1) Vibration while sliding DESACTIVATE
-                    //   -> Vibrate only one time on a pressed button
-                    // 2) Vibration while sliding ACTIVATED
-                    //	-> Vibrate
-                    if ((!SettingsManager.isVibrateWhenSlidingDirectionEnabled() && !hasVibrate) || SettingsManager.isVibrateWhenSlidingDirectionEnabled()) {
-                        vibrator.vibrate(SettingsManager.getVibrationDuration());
-                        hasVibrate = true;
-                    }
+                // 2 cases :
+                // 1) Vibration while sliding DESACTIVATE
+                //   -> Vibrate only one time on a pressed button
+                // 2) Vibration while sliding ACTIVATED
+                //	-> Vibrate
+                if ((!SettingsManager.isVibrateWhenSlidingDirectionEnabled() && !hasVibrate) || SettingsManager.isVibrateWhenSlidingDirectionEnabled()) {
+                    vibrate();
+                    hasVibrate = true;
                 }
             }
             key_pressed = keyCode;

@@ -20,10 +20,7 @@ public class FastForwardingButton extends VirtualButton {
                 isPressed = true;
 
                 SDLActivity.onNativeKeyDown(this.keyCode);
-                // Vibration
-                if (SettingsManager.isVibrationEnabled() && vibrator != null) {
-                    vibrator.vibrate(SettingsManager.getVibrationDuration());
-                }
+                vibrate();
             }
         }
     }
