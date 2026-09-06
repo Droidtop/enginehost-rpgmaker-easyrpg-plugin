@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /** Converts the enginehost contract to EasyRPG Player's existing CLI seam. */
 public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
     private static final String TAG = "EasyRPG[Enginehost]";
-    private static final long MINIMUM_KEY_PRESS_MS = 34;
+    private static final long MINIMUM_KEY_PRESS_MS = 50;
 
     private final Handler keyHandler = new Handler(Looper.getMainLooper());
 
@@ -167,11 +167,19 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
             Log.i(TAG, "Key " + event.getKeyCode() + " -> in-game menu");
             return super.dispatchKeyEvent(event);
         }
-        // Android's synthetic key injection can deliver DOWN and UP inside one
-        // render frame. SDL 1.2 drains both events before EasyRPG samples its
-        // key-state bitset, making an otherwise valid press invisible. Keep the
-        // release across at least two 60 Hz frames. Physical controllers still
-        // get their natural hold duration because their UP arrives later.
+        // Android's synthetic key injection delivers DOWN and UP within a
+        // millisecond of each other, and EasyRPG cannot see a press that short.
+        // Player::MainLoop samples the key state FIRST (UpdateInput) and drains
+        // SDL's queue SECOND (ProcessEvents), and Sdl2Ui keeps a level bitset:
+        // a DOWN and its UP drained by the same ProcessEvents set keys[] true
+        // then false again, so the following sample reads nothing. The press is
+        // never missed by chance -- it is missed every time. Holding the release
+        // one whole game frame is therefore the minimum that can work; 50 ms
+        // buys that even if the game misses its 60 Hz budget badly (down to
+        // 20 fps). A frame longer than that -- a map load, say -- would still
+        // swallow the press, which is why this only pads a release that was
+        // already implausibly short. Physical controllers never reach here:
+        // their UP arrives long after their DOWN.
         if (event.getAction() == KeyEvent.ACTION_UP
                 && event.getEventTime() - event.getDownTime() < MINIMUM_KEY_PRESS_MS) {
             KeyEvent delayedUp = new KeyEvent(event);
@@ -181,6 +189,8 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
                 if (mSurface != null) {
                     SDLActivity.handleKeyEvent(
                         mSurface, delayedUp.getKeyCode(), delayedUp, null);
+                    Log.i(TAG, "Key " + delayedUp.getKeyCode()
+                        + " delayed release -> SDL");
                 }
             }, delay);
             Log.i(TAG, "Key " + event.getKeyCode()
