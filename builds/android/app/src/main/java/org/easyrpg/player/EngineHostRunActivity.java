@@ -174,13 +174,14 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
         // get their natural hold duration because their UP arrives later.
         if (event.getAction() == KeyEvent.ACTION_UP
                 && event.getEventTime() - event.getDownTime() < MINIMUM_KEY_PRESS_MS) {
-            KeyEvent delayedUp = KeyEvent.obtain(event);
+            KeyEvent delayedUp = new KeyEvent(event);
             long delay = MINIMUM_KEY_PRESS_MS
                 - (event.getEventTime() - event.getDownTime());
             keyHandler.postDelayed(() -> {
-                SDLActivity.handleKeyEvent(
-                    mSurface, delayedUp.getKeyCode(), delayedUp, null);
-                delayedUp.recycle();
+                if (mSurface != null) {
+                    SDLActivity.handleKeyEvent(
+                        mSurface, delayedUp.getKeyCode(), delayedUp, null);
+                }
             }, delay);
             Log.i(TAG, "Key " + event.getKeyCode()
                 + " short release delayed " + delay + "ms");
