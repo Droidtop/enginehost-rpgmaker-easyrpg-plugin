@@ -110,6 +110,11 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
         getIntent().putExtra(EasyRpgPlayerActivity.TAG_LOG_FILE, logFile.getPath());
         getIntent().putExtra(EasyRpgPlayerActivity.TAG_COMMAND_LINE, args.toArray(new String[0]));
         getIntent().putExtra(EasyRpgPlayerActivity.TAG_STANDALONE, true);
+        // This class is materialized behind Enginehost's manifest-declared
+        // proxy, so AppCompat cannot discover its theme through ActivityInfo.
+        // The bundle resources are already attached by the host component
+        // factory; select the player's real theme before AppCompat initializes.
+        setTheme(R.style.AppThemePlayerActivity);
         super.onCreate(state);
         playerCreated = true;
     }
