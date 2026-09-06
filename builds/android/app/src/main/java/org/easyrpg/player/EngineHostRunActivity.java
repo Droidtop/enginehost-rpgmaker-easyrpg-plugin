@@ -6,6 +6,8 @@ package org.easyrpg.player;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -27,6 +29,9 @@ import java.util.ArrayList;
 /** Converts the enginehost contract to EasyRPG Player's existing CLI seam. */
 public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
     private static final String TAG = "EasyRPG[Enginehost]";
+    private static final long MINIMUM_KEY_PRESS_MS = 34;
+
+    private final Handler keyHandler = new Handler(Looper.getMainLooper());
 
     private boolean playerCreated;
 
@@ -161,6 +166,25 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
         if (isDrawerOpen()) {
             Log.i(TAG, "Key " + event.getKeyCode() + " -> in-game menu");
             return super.dispatchKeyEvent(event);
+        }
+        // Android's synthetic key injection can deliver DOWN and UP inside one
+        // render frame. SDL 1.2 drains both events before EasyRPG samples its
+        // key-state bitset, making an otherwise valid press invisible. Keep the
+        // release across at least two 60 Hz frames. Physical controllers still
+        // get their natural hold duration because their UP arrives later.
+        if (event.getAction() == KeyEvent.ACTION_UP
+                && event.getEventTime() - event.getDownTime() < MINIMUM_KEY_PRESS_MS) {
+            KeyEvent delayedUp = KeyEvent.obtain(event);
+            long delay = MINIMUM_KEY_PRESS_MS
+                - (event.getEventTime() - event.getDownTime());
+            keyHandler.postDelayed(() -> {
+                SDLActivity.handleKeyEvent(
+                    mSurface, delayedUp.getKeyCode(), delayedUp, null);
+                delayedUp.recycle();
+            }, delay);
+            Log.i(TAG, "Key " + event.getKeyCode()
+                + " short release delayed " + delay + "ms");
+            return true;
         }
         boolean handled = SDLActivity.handleKeyEvent(
             mSurface, event.getKeyCode(), event, null);
