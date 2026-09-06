@@ -6,9 +6,16 @@ package org.easyrpg.player;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import org.easyrpg.player.player.EasyRpgPlayerActivity;
+import org.libsdl.app.SDLActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +26,8 @@ import java.util.ArrayList;
 
 /** Converts the enginehost contract to EasyRPG Player's existing CLI seam. */
 public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
+    private static final String TAG = "EasyRPG[Enginehost]";
+
     private boolean playerCreated;
 
     @Override protected void onCreate(Bundle state) {
@@ -122,6 +131,63 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
     /** Ignore the orientation callback SDL can emit before its own fields exist. */
     @Override public void onConfigurationChanged(Configuration newConfig) {
         if (playerCreated) super.onConfigurationChanged(newConfig);
+    }
+
+    /**
+     * Hands key presses to SDL from the activity instead of relying on view
+     * focus.
+     *
+     * SDL only ever sees a key through the OnKeyListener its surface installs
+     * on itself, which fires solely while that surface is the focused view.
+     * Standalone EasyRPG gets that for free; hosted inside Enginehost's runtime
+     * the player's layout is inflated behind a manifest proxy, and a press
+     * could be delivered to the window, logged by the system input dispatcher
+     * and then reach nothing at all -- exactly what dq-rpgmaker-04 saw, with
+     * touch working and every key ignored. A game runtime has one consumer for
+     * keys, so the activity feeds them to SDL itself and focus stops mattering;
+     * a hardware pad arrives as key events on this console too, so the same
+     * path carries it.
+     *
+     * Three things are deliberately left to Android: the keys the platform owns
+     * (volume, camera, zoom), back and menu (EasyRPG binds them to its own
+     * behaviour through SDLActivity and the back dispatcher), and every key
+     * while the in-game drawer is open, which is an ordinary menu being
+     * navigated rather than gameplay.
+     */
+    @Override public boolean dispatchKeyEvent(KeyEvent event) {
+        if (!playerCreated || mSurface == null || isPlatformKey(event.getKeyCode())) {
+            return super.dispatchKeyEvent(event);
+        }
+        if (isDrawerOpen()) {
+            Log.i(TAG, "Key " + event.getKeyCode() + " -> in-game menu");
+            return super.dispatchKeyEvent(event);
+        }
+        boolean handled = SDLActivity.handleKeyEvent(
+            mSurface, event.getKeyCode(), event, null);
+        Log.i(TAG, "Key " + event.getKeyCode()
+            + " action " + event.getAction()
+            + " source 0x" + Integer.toHexString(event.getSource())
+            + " device " + event.getDeviceId()
+            + (handled ? " -> SDL" : " -> unhandled, passing to Android"));
+        return handled || super.dispatchKeyEvent(event);
+    }
+
+    /** Keys Android must keep, whatever the game would do with them. */
+    private static boolean isPlatformKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_VOLUME_UP
+            || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+            || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE
+            || keyCode == KeyEvent.KEYCODE_CAMERA
+            || keyCode == KeyEvent.KEYCODE_ZOOM_IN
+            || keyCode == KeyEvent.KEYCODE_ZOOM_OUT
+            || keyCode == KeyEvent.KEYCODE_BACK
+            || keyCode == KeyEvent.KEYCODE_MENU;
+    }
+
+    private boolean isDrawerOpen() {
+        View layout = findViewById(R.id.drawer_layout);
+        return layout instanceof DrawerLayout
+            && ((DrawerLayout) layout).isDrawerOpen(GravityCompat.START);
     }
 
     /**
