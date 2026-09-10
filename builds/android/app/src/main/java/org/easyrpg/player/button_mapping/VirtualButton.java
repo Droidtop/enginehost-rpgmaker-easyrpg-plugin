@@ -26,6 +26,13 @@ public class VirtualButton extends View {
     protected boolean debug_mode;
     protected Activity activity;
     protected Vibrator vibrator;
+    /**
+     * Set once a vibrate() call has been refused. Haptic feedback is a
+     * nicety; the process hosting this player may not hold
+     * android.permission.VIBRATE, and asking again on every press only
+     * repeats the same refusal.
+     */
+    private static boolean vibrationUnavailable;
 
     public static final int DPAD = -1, ENTER = KeyEvent.KEYCODE_SPACE, CANCEL = KeyEvent.KEYCODE_B,
             SHIFT = KeyEvent.KEYCODE_SHIFT_LEFT, KEY_0 = KeyEvent.KEYCODE_0, KEY_1 = KeyEvent.KEYCODE_1,
@@ -181,11 +188,27 @@ public class VirtualButton extends View {
                 isPressed = true;
 
                 SDLActivity.onNativeKeyDown(this.keyCode);
-                // Vibration
-                if (SettingsManager.isVibrationEnabled() && vibrator != null) {
-                    vibrator.vibrate(SettingsManager.getVibrationDuration());
-                }
+                vibrate();
             }
+        }
+    }
+
+    /**
+     * Buzzes the device if haptic feedback is switched on and permitted.
+     * Vibrator.vibrate() throws SecurityException when the calling process
+     * lacks android.permission.VIBRATE, which killed the whole runtime on the
+     * first press of any on-screen button. A game must keep playing whether or
+     * not the buttons buzz, so a refusal is recorded and never retried.
+     */
+    protected void vibrate() {
+        if (vibrationUnavailable || vibrator == null || !SettingsManager.isVibrationEnabled()) {
+            return;
+        }
+        try {
+            vibrator.vibrate(SettingsManager.getVibrationDuration());
+        } catch (RuntimeException error) {
+            vibrationUnavailable = true;
+            Log.w("EasyRPG", "Vibration unavailable, playing on without it: " + error);
         }
     }
 

@@ -1,0 +1,15 @@
+{
+  "description": "Enginehost plugin implementation repository for EasyRPG Player",
+  "engine": "rpgmaker",
+  "engineContexts": [
+    "2000",
+    "2003"
+  ],
+  "formatVersion": 1,
+  "implementation": {
+    "id": "easyrpg",
+    "name": "EasyRPG Player",
+    "upstream": "https://github.com/EasyRPG/Player"
+  },
+  "origin": "https://github.com/droidtop/enginehost-rpgmaker-easyrpg-plugin"
+}

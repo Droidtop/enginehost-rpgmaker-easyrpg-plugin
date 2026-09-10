@@ -34,9 +34,7 @@ public class MenuButton extends VirtualButton {
         // Vibration
         if (!debug_mode) {
             if (!isPressed) {
-                if (SettingsManager.isVibrationEnabled() && vibrator != null) {
-                    vibrator.vibrate(SettingsManager.getVibrationDuration());
-                }
+                vibrate();
             }
         }
     }

@@ -43,6 +43,7 @@
         <!-- Setting SDL hints from AndroidManifest.xml: -->
         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0" />
         <meta-data android:name="SDL_ENV.SDL_APP_NAME" android:value="EasyRPG Player" />
+        <meta-data android:name="SDL_ENV.SDL_ANDROID_ALLOW_RECREATE_ACTIVITY" android:value="1" />
 
         <!-- Startup Activity -->
         <activity
@@ -74,6 +75,19 @@
             android:name=".player.EasyRpgPlayerActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/AppThemePlayerActivity"/>
+
+        <activity
+            android:name=".EngineHostRunActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="dev.enginehost.plugin.RUN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="dev.enginehost.plugin.engine" android:value="rpgmaker" />
+            <meta-data android:name="dev.enginehost.plugin.pluginVersion" android:value="0.1.0" />
+            <meta-data android:name="dev.enginehost.plugin.capabilities" android:resource="@raw/enginehost_capabilities" />
+        </activity>
         <!-- Settings' Activity -->
         <activity
             android:name=".settings.SettingsMainActivity"
