@@ -80,18 +80,27 @@ jobs:
             echo "Dependency archive preparation attempt $attempt failed; removing incomplete downloads"
             find . -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.tar.xz' -o -name '*.zip' \) -delete
           done
-          sed -i '/build "ARMeabi-v7a"/d; /build "x86"/d; /build "x86_64"/d' 2_build_toolchain.sh
+          # The plugin ships arm64-v8a and x86_64, so both of those dependency
+          # toolchains have to be built here; only the 32-bit pair is dropped.
+          # The patterns are anchored because the old `build "x86"` matched the
+          # x86_64 line too -- the substring is why the 64-bit build was also
+          # being deleted.
+          sed -i '/^build "ARMeabi-v7a"/d; /^build "x86" /d' 2_build_toolchain.sh
           for attempt in 1 2 3; do
             if ./2_build_toolchain.sh; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             echo "Dependency build attempt $attempt failed; retrying transient upstream downloads"
           done
-          PREFIX="$PWD/arm64-v8a-toolchain"
           NDK_DIR="$(find "$PWD/android-sdk/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           git clone --depth 1 --branch 0.8.1 https://github.com/EasyRPG/liblcf.git liblcf
-          cmake -S liblcf -B liblcf/build -G Ninja \
+          # liblcf is not part of the buildscripts toolchain, so it is built
+          # once per ABI into that ABI's prefix: the Player's CMake appends
+          # <abi>-toolchain to CMAKE_FIND_ROOT_PATH, so each ABI finds its own.
+          for ABI in arm64-v8a x86_64; do
+          PREFIX="$PWD/$ABI-toolchain"
+          cmake -S liblcf -B "liblcf/build-$ABI" -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$NDK_DIR/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 \
+            -DANDROID_ABI="$ABI" -DANDROID_PLATFORM=android-23 \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_PREFIX_PATH="$PREFIX" \
             -DINIH_LIBRARY="$PREFIX/lib/libinih.a" -DINIH_INCLUDE_DIR="$PREFIX/include" \
@@ -102,12 +111,13 @@ jobs:
             -DEXPAT_LIBRARY="$PREFIX/lib/libexpat.a" -DEXPAT_INCLUDE_DIR="$PREFIX/include" \
             -DLIBLCF_ENABLE_TOOLS=OFF -DLIBLCF_ENABLE_TESTS=OFF \
             -DLIBLCF_ENABLE_BENCHMARKS=OFF -DLIBLCF_UPDATE_MIMEDB=OFF
-          cmake --build liblcf/build --target install --parallel 2
+          cmake --build "liblcf/build-$ABI" --target install --parallel 2
+          done
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
-      - name: Build arm64 plugin APK
+      - name: Build the plugin APK
         working-directory: Player/builds/android
         env:
           ANDROID_HOME: ${{ github.workspace }}/buildscripts/android/android-sdk
@@ -129,7 +139,10 @@ jobs:
           cp "$apk" build/payload/runtime.apk
           unzip -q "$apk" 'classes*.dex' 'lib/*' -d build/payload
           test -f build/payload/classes.dex
-          test -n "$(find build/payload/lib -type f -name '*.so' -print -quit)"
+          # Both ABIs are the rule, not a preference: a bundle that lost one
+          # would install and then fail to load on half the devices.
+          test -n "$(find build/payload/lib/arm64-v8a -name '*.so' -print -quit)"
+          test -n "$(find build/payload/lib/x86_64 -name '*.so' -print -quit)"
           # Declare every dex that is actually present, in load order. A
           # lexical sort puts classes10 before classes2, so order numerically.
           python3 - <<'DEXES'
