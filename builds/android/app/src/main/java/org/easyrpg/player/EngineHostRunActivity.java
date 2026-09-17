@@ -71,12 +71,13 @@ public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
             return;
         }
 
-        String savePath = getIntent().getStringExtra("dev.enginehost.runtime.SAVE_PATH");
-        if (savePath == null || savePath.isBlank()) {
-            // Compatibility with early host builds that had not added the
-            // dedicated save extra yet. Current Enginehost always supplies it.
-            savePath = options.optString("savePath", game.getPath());
-        }
+        // RPG Maker 2000/2003 games save beside themselves (SaveNN.lsd in the
+        // game folder), and so does EasyRPG Player by default. Enginehost does
+        // not change where a game saves: its save folder stands in for SYSTEM
+        // locations only, and this engine has none. Saves that came with a
+        // game folder keep loading. A person who wants them elsewhere can
+        // still say so with the savePath option.
+        String savePath = options.optString("savePath", game.getPath());
         ArrayList<String> args = new ArrayList<>();
         args.add("--project-path");
         args.add(game.getPath());
