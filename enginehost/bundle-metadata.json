@@ -1,7 +1,7 @@
 {
   "bundleId": "dev.enginehost.rpgmaker.easyrpg.v1",
   "engine": "rpgmaker",
-  "pluginVersion": "0.1",
+  "pluginVersion": "1.0.0",
   "apiVersion": 1,
   "entrypoint": "org.easyrpg.player.EngineHostRunActivity",
   "runtimeTransport": "android-activity",
