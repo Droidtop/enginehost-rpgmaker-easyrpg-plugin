@@ -1,16 +1,14 @@
 {
   "bundleId": "dev.enginehost.rpgmaker.easyrpg.v1",
   "engine": "rpgmaker",
-  "pluginVersion": "1.0.1",
+  "pluginVersion": "1.1.0",
   "apiVersion": 1,
-  "entrypoint": "org.easyrpg.player.EngineHostRunActivity",
-  "runtimeTransport": "android-activity",
+  "entrypoint": "dev.enginehost.plugin.easyrpg.EasyRpgPlugin",
   "origin": "https://github.com/droidtop/enginehost-rpgmaker-easyrpg-plugin",
+  "isolatable": true,
+  "writesGameFolder": true,
   "dexFiles": [
     "classes.dex"
-  ],
-  "resourceApks": [
-    "runtime.apk"
   ],
   "capabilities": [
     {
@@ -120,27 +118,6 @@
       "description": "Sound effect volume, 0 to 100 (--sound-volume, src/game_config.cpp:524)."
     },
     {
-      "key": "scalingMode",
-      "label": "Scaling method",
-      "type": "choice",
-      "repeats": false,
-      "description": "How the game picture is scaled to the screen (--scaling, src/game_config.cpp:492, values at src/game_config.h:127).",
-      "choices": [
-        {
-          "value": "nearest",
-          "label": "Nearest (fills the screen)"
-        },
-        {
-          "value": "integer",
-          "label": "Integer (square pixels)"
-        },
-        {
-          "value": "bilinear",
-          "label": "Bilinear (smoothed)"
-        }
-      ]
-    },
-    {
       "key": "gameResolution",
       "label": "Game resolution",
       "type": "choice",
@@ -160,20 +137,6 @@
           "label": "Ultrawide 560x240"
         }
       ]
-    },
-    {
-      "key": "fullscreen",
-      "label": "Fullscreen",
-      "type": "boolean",
-      "repeats": false,
-      "description": "Starts fullscreen rather than in a window (--fullscreen / --window, src/game_config.cpp:474-481)."
-    },
-    {
-      "key": "vsync",
-      "label": "Vertical sync",
-      "type": "boolean",
-      "repeats": false,
-      "description": "Synchronises presentation with the display refresh (--vsync / --no-vsync, src/game_config.cpp:440)."
     },
     {
       "key": "fpsLimit",
