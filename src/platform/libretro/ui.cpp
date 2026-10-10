@@ -350,6 +350,23 @@ static void init_easy_rpg() {
 	LibretroUi::player_exit_called = false;
 	std::vector<std::string> args;
 
+	// A frontend that embeds this core for one game can hand the Player its
+	// command line (--project-path, --encoding, --engine ...) as the value of
+	// this variable, one argument per line. It is not a core option, so
+	// RetroArch never shows or sets it and nothing changes there.
+	args.push_back("easyrpg-player");
+	struct retro_variable command_line = { "easyrpg_command_line", nullptr };
+	if (LibretroUi::environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &command_line) && command_line.value) {
+		std::string all = command_line.value;
+		size_t start = 0;
+		while (start <= all.size()) {
+			size_t end = all.find('\n', start);
+			if (end == std::string::npos) end = all.size();
+			if (end > start) args.push_back(all.substr(start, end - start));
+			start = end + 1;
+		}
+	}
+
 	Player::Init(args);
 
 	Input::Init(LibretroUi::cfg_input, "", "");
