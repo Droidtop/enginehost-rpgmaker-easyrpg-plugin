@@ -117,55 +117,63 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: Build the plugin APK
-        working-directory: Player/builds/android
-        env:
-          ANDROID_HOME: ${{ github.workspace }}/buildscripts/android/android-sdk
-          ANDROID_SDK_ROOT: ${{ github.workspace }}/buildscripts/android/android-sdk
-        run: ./gradlew -PtoolchainDirs="${{ github.workspace }}/buildscripts/android" :app:assembleDebug --stacktrace
+      - name: Build the Player's libretro core into the sandboxed plugin library
+        # enginehost/android/CMakeLists.txt: the core (static), Enginehost's
+        # libretro frontend and file layer, one library per ABI, C++ runtime
+        # inside it. Runs in Enginehost's isolated process (EasyRpgPlugin).
+        working-directory: Player
+        run: |
+          set -euo pipefail
+          git submodule update --init --depth 1 builds/libretro/libretro-common
+          NDK_DIR="$(find "$GITHUB_WORKSPACE/buildscripts/android/android-sdk/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          for ABI in arm64-v8a x86_64; do
+            cmake -S enginehost/android -B "build/enginehost-$ABI" -G Ninja \
+              -DCMAKE_TOOLCHAIN_FILE="$NDK_DIR/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI="$ABI" -DANDROID_PLATFORM=android-26 -DANDROID_STL=c++_static \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DPLAYER_ANDROID_TOOLCHAIN_PATH="$GITHUB_WORKSPACE/buildscripts/android"
+            cmake --build "build/enginehost-$ABI" --target easyrpg_enginehost --parallel 4
+          done
+      - name: Compile the plugin class
+        # The API classes are Enginehost's at run time: compiled against,
+        # never packed.
+        working-directory: Player
+        run: |
+          set -euo pipefail
+          sdk=/usr/local/lib/android/sdk
+          jar="$(ls -d "$sdk"/platforms/android-* | sort -V | tail -1)/android.jar"
+          d8="$(ls -d "$sdk"/build-tools/* | sort -V | tail -1)/d8"
+          mkdir -p build/api-classes build/plugin-classes
+          javac -nowarn -source 17 -target 17 -cp "$jar" -d build/api-classes $(find enginehost/android/api -name '*.java')
+          javac -nowarn -source 17 -target 17 -cp "$jar:build/api-classes" -d build/plugin-classes \
+            plugin-native/libretro/LibretroPlugin.java $(find enginehost/android/java -name '*.java')
+          mkdir -p build/dex
+          "$d8" --release --min-api 26 --lib "$jar" --classpath build/api-classes --output build/dex \
+            $(find build/plugin-classes -name '*.class')
       - name: Pack the unsigned bundle inputs
         if: startsWith(github.ref, 'refs/heads/plugin/')
         working-directory: Player
         run: |
-          # A long chain of bare `test`s: without tracing, any one of them
-          # fails the job silently after a very long native build.
-          set -x
-          apk="$(find builds/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
-          test -f "$apk"
+          set -euo pipefail
           mkdir -p build/unsigned/payload
-          cp "$apk" build/unsigned/payload/runtime.apk
-          unzip -q "$apk" 'classes*.dex' 'lib/*' -d build/unsigned/payload
-          test -f build/unsigned/payload/classes.dex
-          # Both ABIs are the rule, not a preference: a bundle that lost one
-          # would install and then fail to load on half the devices.
-          test -n "$(find build/unsigned/payload/lib/arm64-v8a -name '*.so' -print -quit)"
-          test -n "$(find build/unsigned/payload/lib/x86_64 -name '*.so' -print -quit)"
-          # Declare every dex that is actually present, in load order. A
-          # lexical sort puts classes10 before classes2, so order numerically.
-          python3 - <<'DEXES'
-          import json, pathlib, re
-          payload = pathlib.Path('build/unsigned/payload')
-          def order(p):
-              m = re.fullmatch(r'classes(\d*)\.dex', p.name)
-              return int(m.group(1) or 1)
-          dexes = sorted(payload.glob('classes*.dex'), key=order)
-          assert dexes, 'no classes*.dex in the APK payload'
-          data = json.loads(pathlib.Path('enginehost/bundle-metadata.json').read_text())
-          data['dexFiles'] = [d.name for d in dexes]
-          pathlib.Path('build/unsigned/bundle-metadata.json').write_text(json.dumps(data, indent=2) + '\n')
-          print('dexFiles =', data['dexFiles'])
-          DEXES
+          cp build/dex/classes.dex build/unsigned/payload/classes.dex
+          nm="$(find "$GITHUB_WORKSPACE/buildscripts/android/android-sdk/ndk" -name llvm-nm -path '*linux-x86_64*' | head -1)"
+          for ABI in arm64-v8a x86_64; do
+            mkdir -p "build/unsigned/payload/lib/$ABI"
+            cp "build/enginehost-$ABI/libeasyrpg_enginehost.so" "build/unsigned/payload/lib/$ABI/"
+            # The isolated runtime binds the plugin's natives and the file
+            # layer through these two entry points.
+            symbols="$("$nm" -D --defined-only "build/unsigned/payload/lib/$ABI/libeasyrpg_enginehost.so")"
+            grep -q ' enginehost_register_natives$' <<<"$symbols"
+            grep -q ' enginehost_vfs_bind$' <<<"$symbols"
+          done
+          cp enginehost/bundle-metadata.json build/unsigned/bundle-metadata.json
           cp enginehost/LICENSES.md build/unsigned/payload/LICENSES.md
           cp COPYING build/unsigned/payload/COPYING.easyrpg
           cp resources/shinonome/AUTHORS build/unsigned/payload/AUTHORS.shinonome
           cp resources/ttyp0/LICENSE build/unsigned/payload/LICENSE.ttyp0
           # A tar keeps the file modes the manifest signs; an artifact would not.
           tar -cf build/unsigned.tar -C build/unsigned payload bundle-metadata.json
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: enginehost-rpgmaker-easyrpg-apk
-          path: Player/builds/android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: startsWith(github.ref, 'refs/heads/plugin/')
         with:

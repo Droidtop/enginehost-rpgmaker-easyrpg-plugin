@@ -1,0 +1,7 @@
+# Engine-side changes the wrapper needs, applied by plugin-line compose in this
+# order to the line's upstream commit; "<version range> <patch>" (Droidtop/tracker#324).
+# The Player's command line from the frontend (EasyRpgPlugin passes the options
+# through easyrpg_enginehost_arguments). Upstreamable as is.
+* libretro-command-line.patch
+# Supply-chain rule: third-party actions pinned by commit in upstream's own workflows.
+* pin-upstream-actions.patch

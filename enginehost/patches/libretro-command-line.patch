@@ -1,0 +1,27 @@
+diff --git a/src/platform/libretro/ui.cpp b/src/platform/libretro/ui.cpp
+index e05087ed9..0bdda6cb5 100644
+--- a/src/platform/libretro/ui.cpp
++++ b/src/platform/libretro/ui.cpp
+@@ -343,6 +343,22 @@ static void init_easy_rpg() {
+ 	LibretroUi::player_exit_called = false;
+ 	std::vector<std::string> args;
+ 
++	// A frontend that knows the Player's command line (Enginehost's, which
++	// runs this core in its sandbox) passes it as the value of this variable,
++	// one argument per line. RetroArch has no such variable and passes none.
++	args.push_back("easyrpg-player");
++	struct retro_variable command_line = { "easyrpg_enginehost_arguments", nullptr };
++	if (LibretroUi::environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &command_line) && command_line.value) {
++		std::string all = command_line.value;
++		size_t start = 0;
++		while (start <= all.size()) {
++			size_t end = all.find('\n', start);
++			if (end == std::string::npos) end = all.size();
++			if (end > start) args.push_back(all.substr(start, end - start));
++			start = end + 1;
++		}
++	}
++
+ 	Player::Init(args);
+ 
+ 	Input::Init(LibretroUi::cfg_input, "", "");
