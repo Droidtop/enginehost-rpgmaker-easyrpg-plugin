@@ -4,8 +4,7 @@
  */
 package org.easyrpg.player;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -18,10 +17,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /** Converts the enginehost contract to EasyRPG Player's existing CLI seam. */
-public final class EngineHostRunActivity extends Activity {
-    @Override protected void onCreate(Bundle state) {
-        super.onCreate(state);
+public final class EngineHostRunActivity extends EasyRpgPlayerActivity {
+    private boolean playerCreated;
 
+    @Override protected void onCreate(Bundle state) {
         String context = getIntent().getStringExtra("engineContext");
         if (!"2000".equals(context) && !"2003".equals(context)) {
             fail("Unsupported RPG Maker engineContext: " + context);
@@ -75,13 +74,23 @@ public final class EngineHostRunActivity extends Activity {
         if (options.optBoolean("testPlay", false)) args.add("--test-play");
         if (options.optBoolean("hideTitle", false)) args.add("--hide-title");
 
-        Intent player = new Intent(this, EasyRpgPlayerActivity.class);
-        player.putExtra(EasyRpgPlayerActivity.TAG_SAVE_PATH, savePath);
-        player.putExtra(EasyRpgPlayerActivity.TAG_LOG_FILE, logFile.getPath());
-        player.putExtra(EasyRpgPlayerActivity.TAG_COMMAND_LINE, args.toArray(new String[0]));
-        player.putExtra(EasyRpgPlayerActivity.TAG_STANDALONE, true);
-        startActivity(player);
-        finish();
+        getIntent().putExtra(EasyRpgPlayerActivity.TAG_SAVE_PATH, savePath);
+        getIntent().putExtra(EasyRpgPlayerActivity.TAG_LOG_FILE, logFile.getPath());
+        getIntent().putExtra(EasyRpgPlayerActivity.TAG_COMMAND_LINE, args.toArray(new String[0]));
+        getIntent().putExtra(EasyRpgPlayerActivity.TAG_STANDALONE, true);
+        super.onCreate(state);
+        playerCreated = true;
+    }
+
+    /**
+     * Setting up SDL can itself trigger the host component's pending
+     * orientation callback. SDLActivity's configuration handler assumes its
+     * cursor list already exists, so forwarding that early callback crashes
+     * before the first frame. The real post-create callbacks still follow the
+     * normal EasyRPG path.
+     */
+    @Override public void onConfigurationChanged(Configuration newConfig) {
+        if (playerCreated) super.onConfigurationChanged(newConfig);
     }
 
     private static void addValueOption(
