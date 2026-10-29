@@ -137,6 +137,9 @@ jobs:
       # The plugin API this core compiles against: Enginehost's own, at the commit pinned here
       # (Droidtop/tracker#768: this repository used to commit a copy, which had fallen behind).
       - uses: Droidtop/enginehost/.github/actions/plugin-api@527142623b8099782637b46c09e77e86988cfea9
+        with:
+          # Beside the tree the compile step runs in.
+          path: Player/build/enginehost
       - name: Compile the plugin class
         # The API classes are Enginehost's at run time: compiled against,
         # never packed.
