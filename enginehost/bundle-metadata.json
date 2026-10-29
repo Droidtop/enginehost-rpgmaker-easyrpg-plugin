@@ -1,7 +1,7 @@
 {
   "bundleId": "dev.enginehost.rpgmaker.easyrpg.v1",
   "engine": "rpgmaker",
-  "pluginVersion": "1.1.2",
+  "pluginVersion": "1.1.3",
   "apiVersion": 1,
   "entrypoint": "dev.enginehost.plugin.easyrpg.EasyRpgPlugin",
   "origin": "https://github.com/droidtop/enginehost-rpgmaker-easyrpg-plugin",
