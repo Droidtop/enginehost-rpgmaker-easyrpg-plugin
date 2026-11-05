@@ -1,10 +1,7 @@
 # enginehost EasyRPG plugin
 
 This fork is the independently installable RPG Maker 2000/2003 runtime in
-enginehost's shared `rpgmaker` family. The upstream-facing `master` branch
-continues to follow EasyRPG Player. `plugin-core` contains the portable Android
-contract changeset; release branches start at an EasyRPG revision and merge
-that changeset.
+enginehost's shared `rpgmaker` family. Its branches are described under "Branches" below.
 
 The game runs in Enginehost's sandbox (`isolatable`, Enginehost
 `docs/engine-sandbox.md`, "Engines with a libretro core"): the Player's own
@@ -22,3 +19,16 @@ soundfont option pointing elsewhere is not reachable yet.
 
 EasyRPG Player is GPL-3.0-or-later. The enginehost integration is distributed
 under the same terms and preserves upstream authorship and `COPYING`.
+
+## Branches
+
+A core has only these branches (Droidtop/tracker#324, the owner, 2026-11-05):
+
+- `upstream-sync` follows upstream EasyRPG Player (`EasyRPG/Player`). The daily `sync-upstream`
+  workflow (on `plugin-core`) merges upstream's `master` into it; nothing of ours is developed
+  there.
+- `plugin-core`, the default branch, is the Enginehost recipe: the wrapper, the build workflows,
+  the bundle metadata, the patch series and the line pins. Recipe changes land here first,
+  through `ci/` branches.
+- `plugin/<line>` is upstream at the commit `enginehost/lines/<line>/line.json` pins, composed
+  with `plugin-core` by the plugin-line tool. Nothing on it is written by hand.
